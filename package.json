@@ -10,10 +10,19 @@
   "author": "Olabode yele",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.0",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.1",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "jsonwebtoken": "^8.5.1",
+    "moment": "^2.29.4",
     "mongodb": "^4.12.1",
-    "mongoose": "^6.8.0"
+    "mongoose": "^6.8.0",
+    "passport": "^0.6.0",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0",
+    "sequelize": "^6.27.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.20"
