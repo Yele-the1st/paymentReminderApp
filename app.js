@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const multer = require("multer");
 
 const adminRoutes = require("./routes/admin");
+const authRoutes = require("./routes/auth");
 
 const app = express();
 
@@ -48,12 +49,14 @@ app.use((req, res, next) => {
 });
 
 app.use("/admin", adminRoutes);
+app.use("/auth", authRoutes);
 
 app.use((error, req, res, next) => {
   console.log(error);
   const status = error.statusCode || 500;
   const message = error.message;
-  res.status(status).json({ message: message });
+  const data = error.data;
+  res.status(status).json({ message: message, data: data });
 });
 
 //connecting to DB & Starting Server
