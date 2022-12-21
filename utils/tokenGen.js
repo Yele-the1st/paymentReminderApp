@@ -6,5 +6,10 @@ module.exports = {
             data: email
           }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES});
 
+    },
+    verifyToken: (token)=>{
+        return jwt.verify(
+            token, process.env.JWT_SECRET
+        )
     }
 }

@@ -37,6 +37,8 @@ module.exports = {
             throw err
         })
 
+        console.log(user)
+
         if(!user){ throw Error("User Not Found,Please Signup") }
         //validate user password
         let validatePassword = await user.comparePassword(password,user.password)
@@ -44,21 +46,22 @@ module.exports = {
         if(!validatePassword ){ throw Error("Invalid Password/Email") }
 
         //check for active sessions
-        if(user.sessionToken){
-            jwt.verify(user.sessionToken,process.env.JWT_SECRET,function(error,jwtdecoded){
-                if(!error && jwtdecoded){
-                    throw Error("You already have an active session,kindly signout")
-                }
-            })
-        }
+        // if(user.sessionToken){
+        //     let session = tokenGen.verifyToken(user.sessionToken)  
+        //     let expires =  session.exp +  new Date().getTime()
+        //     console.log(new Date(expires), new Date())
+        //     if(expires  > new Date()){
+        //         throw Error(`You have an active session`)
+        //     }
+        // }
 
+       
         //create session token 
         let sessionToken = tokenGen.signToken(email)
-
         //save session token
         user.sessionToken = sessionToken
         user.lastLogin = moment().format()
-        await user.save()
+        await user.save().catch((err)=> { throw err})
 
         let respObj = {
             firstname: user.firstname,
@@ -66,6 +69,7 @@ module.exports = {
             token: user.sessionToken,
             active: user.active
         }
+        
         return respObj
 
     }
