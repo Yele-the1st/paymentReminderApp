@@ -7,9 +7,19 @@ const listing = require("../models/listing");
 const Listing = require("../models/listing");
 
 exports.getJobs = (req, res, next) => {
+  const currentPage = req.query.page || 1;
+  const perPage = 2;
+  let totalItems;
   Listing.find()
+    .countDocuments()
+    .then((count) => {
+      totalItems = count;
+      return Listing.find()
+        .skip((currentPage - 1) * perPage)
+        .limit(perPage);
+    })
     .then((jobs) => {
-      res.status(200).json({ message: "Fetched Jobs Succesfully", jobs: jobs });
+      res.status(200).json({ message: "Fetched Jobs Succesfully", jobs: jobs, totalItems: totalItems });
     })
     .catch((err) => {
       if (!err.statusCode) {
