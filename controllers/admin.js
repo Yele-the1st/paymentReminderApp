@@ -3,8 +3,11 @@ const path = require("path");
 
 const { validationResult, Result } = require("express-validator");
 const listing = require("../models/listing");
+const User = require("../models/user");
 
 const Listing = require("../models/listing");
+const { post } = require("../routes/auth");
+const user = require("../models/user");
 
 exports.getJobs = (req, res, next) => {
   const currentPage = req.query.page || 1;
@@ -19,7 +22,11 @@ exports.getJobs = (req, res, next) => {
         .limit(perPage);
     })
     .then((jobs) => {
-      res.status(200).json({ message: "Fetched Jobs Succesfully", jobs: jobs, totalItems: totalItems });
+      res.status(200).json({
+        message: "Fetched Jobs Succesfully",
+        jobs: jobs,
+        totalItems: totalItems,
+      });
     })
     .catch((err) => {
       if (!err.statusCode) {
@@ -52,6 +59,7 @@ exports.postJob = (req, res, next) => {
     feeAmount,
   } = req.body;
   const imageUrl = req.file.path;
+  let creator;
   const job = new Listing({
     clientFirstName,
     clientLastName,
@@ -62,13 +70,23 @@ exports.postJob = (req, res, next) => {
     completionDate,
     feeAmount,
     imageUrl,
+    creator,
   });
   job
     .save()
     .then((result) => {
+      return User.findById(req.userId);
+    })
+    .then((user) => {
+      creator = user;
+      user.jobs.push(job);
+      return user.save();
+    })
+    .then((result) => {
       res.status(201).json({
         message: "Resource created successful",
-        job: result._id,
+        job: job._id,
+        creator: { _id: creator._id, name: creator.name },
       });
     })
     .catch((err) => {
@@ -132,6 +150,11 @@ exports.updateJob = (req, res, next) => {
         error.statusCode = 404;
         throw error;
       }
+      if (post.creator.toString() !== req.userId) {
+        const error = new Error("Not authorized");
+        error.statusCode = 403;
+        throw error;
+      }
       if (imageUrl !== job.imageUrl) {
         clearImage(job.imageUrl);
       }
@@ -166,12 +189,23 @@ exports.deleteJob = (req, res, next) => {
         error.statusCode = 404;
         throw error;
       }
+      if (post.creator.toString() !== req.userId) {
+        const error = new Error("Not authorized");
+        error.statusCode = 403;
+        throw error;
+      }
       // Check logged in user
       clearImage(job.imageUrl);
       return Listing.findByIdAndRemove(jobId);
     })
     .then((result) => {
-      console.log(result);
+      return User.findById(req.userId);
+    })
+    .then((user) => {
+      user.jobs.pull(jobId);
+      return user.save();
+    })
+    .then(result => {
       res.status(200).json({ message: "Deleted Job" });
     })
     .catch((err) => {

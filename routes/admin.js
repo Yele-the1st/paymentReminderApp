@@ -2,15 +2,16 @@ const express = require("express");
 const { body } = require("express-validator");
 
 const adminController = require("../controllers/admin");
+const isAuth = require("../middleware/is-auth");
 
 const router = express.Router();
 
 //GET /admin/jobs
-router.get("/jobs", adminController.getJobs);
+router.get("/jobs", isAuth, adminController.getJobs);
 
 //POST /admin/job
 router.post(
-  "/job",
+  "/job", isAuth,
   [
     body("clientFirstName", "Name has to be between 2 to 20 characters max")
       .trim()
@@ -42,10 +43,10 @@ router.post(
 );
 
 // router.get("/admin/job/:jobId");
-router.get("/job/:jobId", adminController.getJob);
+router.get("/job/:jobId", isAuth, adminController.getJob);
 
 router.put(
-  "/job/:jobId",
+  "/job/:jobId", isAuth,
   [
     body("clientFirstName", "Name has to be between 2 to 20 characters max")
       .trim()
@@ -76,6 +77,6 @@ router.put(
   adminController.updateJob
 );
 
-router.delete("/job/:jobId", adminController.deleteJob);
+router.delete("/job/:jobId", isAuth, adminController.deleteJob);
 
 module.exports = router;

@@ -40,6 +40,11 @@ const listingSchema = new Schema({
     type: String,
     required: false,
   },
+  creator: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  }
 });
 
 module.exports = mongoose.model('Listing', listingSchema);
